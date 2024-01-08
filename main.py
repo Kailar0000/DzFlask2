@@ -1,16 +1,34 @@
-# This is a sample Python script.
+from flask import Flask, request, render_template, redirect, url_for, make_response
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template("start.html")
+
+@app.post('/start/')
+def start():
+    response = make_response(render_template("start.html"))
+    name = request.form.get('name')
+    mail = request.form.get('mail')
+    response = make_response(redirect(url_for('hello', name=name)))
+    response.set_cookie('name', name)
+    response.set_cookie('mail', mail)
+    return response
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@app.route('/hello/<name>')
+def hello(name):
+    return render_template('hello.html', name=name)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+@app.post('/exit/')
+def exit():
+    response = make_response(redirect(url_for('index')))
+    response.set_cookie('name', 'bar', max_age=0)
+    response.set_cookie('mail', 'bar', max_age=0)
+    return response
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+if __name__ == "__main__":
+    app.run(debug=True)
